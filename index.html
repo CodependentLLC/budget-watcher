@@ -84,13 +84,15 @@
                     <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
                         <h2 class="text-lg font-semibold text-slate-700">Transaction History</h2>
                         <div class="flex items-center gap-2">
+                            <button id="import-btn" class="action-btn">Import CSV</button>
+                            <input type="file" id="import-csv-input" class="hidden" accept=".csv">
                             <select id="export-format" class="action-btn">
                                 <option value="" disabled selected>Export As</option>
                                 <option value="json">JSON</option>
                                 <option value="csv">CSV</option>
                                 <option value="pdf">PDF</option>
                             </select>
-                            <button id="export-btn" class="action-btn bg-indigo-600 text-white hover:bg-indigo-700">Export</button>
+                            <button id="export-btn" class="action-btn bg-indigo-600 text-white hover:bg-indigo-700 p-2">Export</button>
                         </div>
                     </div>
                     <div id="transaction-list-container" class="flex-grow overflow-y-auto custom-scrollbar pr-2 -mr-2">

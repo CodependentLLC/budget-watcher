@@ -141,6 +141,190 @@ const handleDeleteTransaction = (e) => {
     }
 };
 
+// --- IMPORT LOGIC ---
+const importCSVInput = document.getElementById('import-csv-input');
+const importBtn = document.getElementById('import-btn');
+const handleImportCSV = (file) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const csvData = event.target.result;
+        const rows = csvData.split('\n').map(row => row.split(','));
+        const headers = rows[0].map(header => header.trim().toLowerCase());
+        const transactions = rows.slice(1).map(row => {
+            const transaction = {};
+            row.forEach((value, index) => {
+                transaction[headers[index]] = value.trim();
+            });
+            transaction.amount = parseFloat(transaction.amount);
+            transaction.createdAt = new Date(transaction.createdAt).toISOString();
+            transaction.id = crypto.randomUUID(); // Generate a new ID
+            return transaction;
+        }).filter(tx => tx.description && !isNaN(tx.amount) && tx.amount > 0 && (tx.type === 'income' || tx.type === 'expense'));
+        if (transactions.length === 0) {
+            showMessage("No valid transactions found in the CSV file.");
+            return;
+        }
+        localTransactions = [...transactions, ...localTransactions]; // Add new transactions to the beginning
+        saveTransactionsToStorage(localTransactions);
+        renderUI();
+        showMessage("Transactions imported successfully!");
+    };
+    reader.onerror = () => {
+        showMessage("Error reading the CSV file. Please try again.");
+    };
+    reader.readAsText(file);
+};
+importBtn.addEventListener('click', () => {
+    importCSVInput.click();
+});
+importCSVInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'text/csv') {
+        handleImportCSV(file);
+    } else {
+        showMessage("Please select a valid CSV file.");
+    }
+    importCSVInput.value = ''; // Reset input
+});
+
+// --- MESSAGE MODAL LOGIC ---
+closeModalBtn.addEventListener('click', () => {
+    messageModal.classList.add('hidden');
+});
+// const messageModal = document.getElementById('message-modal');
+// const messageText = document.getElementById('message-text');
+// const closeModalBtn = document.getElementById('close-modal-btn');
+messageModal.addEventListener('click', (e) => {
+    if (e.target === messageModal || e.target === closeModalBtn) {
+        messageModal.classList.add('hidden');
+    }
+});
+messageModal.classList.add('hidden');
+document.addEventListener('DOMContentLoaded', () => {
+    // Ensure the modal is hidden on initial load
+    messageModal.classList.add('hidden');
+    // Initialize the UI
+    initialize();
+    renderUI();
+    // Set up event listeners
+    transactionForm.addEventListener('submit', handleAddTransaction);
+    transactionListEl.addEventListener('click', handleDeleteTransaction);
+    exportBtn.addEventListener('click', handleExport);
+});
+
+// --- TRANSACTION MANAGEMENT ---
+// const handleAddTransaction = (e) => {
+//     e.preventDefault();
+//     const description = transactionForm.description.value.trim();
+//     const amount = parseFloat(transactionForm.amount.value);
+//     const type = transactionForm.type.value;
+
+//     if (!description || isNaN(amount) || amount <= 0) {
+//         showMessage("Please enter a valid description and a positive amount.");
+//         return;
+//     }
+
+//     const newTransaction = {
+//         id: crypto.randomUUID(),
+//         description,
+//         amount,
+//         type,
+//         createdAt: new Date().toISOString()
+//     };
+
+//     localTransactions.unshift(newTransaction); // Add to the beginning
+//     saveTransactionsToStorage(localTransactions);
+//     renderUI();
+//     transactionForm.reset();
+// };
+// const handleDeleteTransaction = (e) => {
+//     const deleteBtn = e.target.closest('.delete-btn');
+//     if (deleteBtn) {
+//         const id = deleteBtn.dataset.id;
+//         localTransactions = localTransactions.filter(tx => tx.id !== id);
+//         saveTransactionsToStorage(localTransactions);
+//         renderUI();
+//     }
+// };
+
+// --- TRANSACTION IMPORT LOGIC ---
+// const importCSVInput = document.getElementById('import-csv-input');
+// const importBtn = document.getElementById('import-btn');
+// const handleImportCSV = (file) => {
+//     const reader = new FileReader();
+//     reader.onload = (event) => {
+//         const csvData = event.target.result;
+//         const rows = csvData.split('\n').map(row => row.split(','));
+//         const headers = rows[0].map(header => header.trim().toLowerCase());
+//         const transactions = rows.slice(1).map(row => {
+//             const transaction = {};
+//             row.forEach((value, index) => {
+//                 transaction[headers[index]] = value.trim();
+//             });
+//             transaction.amount = parseFloat(transaction.amount);
+//             transaction.createdAt = new Date(transaction.createdAt).toISOString();
+//             transaction.id = crypto.randomUUID(); // Generate a new ID
+//             return transaction;
+//         }).filter(tx => tx.description && !isNaN(tx.amount) && tx.amount > 0 && (tx.type === 'income' || tx.type === 'expense'));
+//         if (transactions.length === 0) {
+//             showMessage("No valid transactions found in the CSV file.");
+//             return;
+//         }
+//         localTransactions = [...transactions, ...localTransactions]; // Add new transactions to the beginning
+//         saveTransactionsToStorage(localTransactions);
+//         renderUI();
+//         showMessage("Transactions imported successfully!");
+//     };
+//     reader.onerror = () => {
+//         showMessage("Error reading the CSV file. Please try again.");
+//     };
+//     reader.readAsText(file);
+// };
+importBtn.addEventListener('click', () => {
+    importCSVInput.click();
+});
+importCSVInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'text/csv') {
+        handleImportCSV(file);
+    } else {
+        showMessage("Please select a valid CSV file.");
+    }
+    importCSVInput.value = ''; // Reset input
+});
+
+// --- MESSAGE MODAL LOGIC ---
+// const messageModal = document.getElementById('message-modal');
+// const messageText = document.getElementById('message-text');
+// const closeModalBtn = document.getElementById('close-modal-btn');
+closeModalBtn.addEventListener('click', () => {
+    messageModal.classList.add('hidden');
+});
+messageModal.addEventListener('click', (e) => {
+    if (e.target === messageModal || e.target === closeModalBtn) {
+        messageModal.classList.add('hidden');
+    }
+});
+messageModal.classList.add('hidden');
+document.addEventListener('DOMContentLoaded', () => {
+    // Ensure the modal is hidden on initial load
+    messageModal.classList.add('hidden');
+    // Initialize the UI
+    initialize();
+    renderUI();
+    // Set up event listeners
+    transactionForm.addEventListener('submit', handleAddTransaction);
+    transactionListEl.addEventListener('click', handleDeleteTransaction);
+    exportBtn.addEventListener('click', handleExport);
+});
+
+// --- INITIALIZATION ---
+// const initialize = () => {
+//     localTransactions = getTransactionsFromStorage();
+//     renderUI();
+// };
+
+
 // --- EXPORT LOGIC ---
 
 const handleExport = () => {
